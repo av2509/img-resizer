@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Convert images to PDF online. Easy drag-and-drop interface with PDF download feature. SEO-optimized and AdSense ready.">
+  <meta name="keywords" content="image to pdf, convert image pdf, image converter, online pdf tool">
+  <title>Image to PDF Converter</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      text-align: center;
+    }
+    header {
+      background-color: #007bff;
+      color: white;
+      padding: 20px;
+    }
+    main {
+      max-width: 800px;
+      margin: 20px auto;
+      padding: 20px;
+      background: white;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .drop-zone {
+      border: 2px dashed #007bff;
+      padding: 40px;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+      cursor: pointer;
+      color: #007bff;
+      margin-bottom: 20px;
+    }
+    .drop-zone.dragover {
+      background-color: #e9f5ff;
+    }
+    .adsense-slot {
+      margin: 30px 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #preview img {
+      width: 100px;
+      margin: 10px;
+    }
+  </style>
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js" crossorigin="anonymous"></script>
+</head>
+<body>
+  <header>
+    <h1>Image to PDF Converter</h1>
+    <p>Upload or drag-and-drop images to convert them into a single PDF.</p>
+  </header>
+
+  <main>
+    <div class="adsense-slot">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="1234567890"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+
+    <div class="drop-zone" id="dropZone">Drop images here or click to upload</div>
+    <input type="file" id="imageInput" accept="image/*" multiple style="display:none;">
+    <div id="preview"></div>
+    <button onclick="convertToPDF()">Convert to PDF</button>
+
+    <div class="adsense-slot">
+      <ins class="adsbygoogle"
+           style="display:block"
+           data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+           data-ad-slot="0987654321"
+           data-ad-format="auto"
+           data-full-width-responsive="true"></ins>
+      <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    </div>
+  </main>
+
+  <script>
+    const dropZone = document.getElementById('dropZone');
+    const imageInput = document.getElementById('imageInput');
+    const preview = document.getElementById('preview');
+    let images = [];
+
+    dropZone.addEventListener('click', () => imageInput.click());
+    dropZone.addEventListener('dragover', e => {
+      e.preventDefault();
+      dropZone.classList.add('dragover');
+    });
+    dropZone.addEventListener('dragleave', () => {
+      dropZone.classList.remove('dragover');
+    });
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault();
+      dropZone.classList.remove('dragover');
+      handleFiles(e.dataTransfer.files);
+    });
+    imageInput.addEventListener('change', () => handleFiles(imageInput.files));
+
+    function handleFiles(files) {
+      images = Array.from(files);
+      preview.innerHTML = '';
+      images.forEach(file => {
+        const reader = new FileReader();
+        reader.onload = e => {
+          const img = document.createElement('img');
+          img.src = e.target.result;
+          preview.appendChild(img);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function convertToPDF() {
+      if (images.length === 0) return alert("Please upload images first.");
+      const { jsPDF } = window.jspdf;
+      const pdf = new jsPDF();
+      for (let i = 0; i < images.length; i++) {
+        const imgData = await getImageData(images[i]);
+        const img = new Image();
+        img.src = imgData;
+        await new Promise(resolve => {
+          img.onload = () => {
+            const width = pdf.internal.pageSize.getWidth();
+            const height = (img.height * width) / img.width;
+            if (i > 0) pdf.addPage();
+            pdf.addImage(imgData, 'JPEG', 0, 0, width, height);
+            resolve();
+          };
+        });
+      }
+      pdf.save("converted.pdf");
+    }
+
+    function getImageData(file) {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = e => resolve(e.target.result);
+        reader.readAsDataURL(file);
+      });
+    }
+  </script>
+</body>
+</html>
